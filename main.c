@@ -8,6 +8,7 @@
 #include <linux/limits.h>
 
 int flag = 0;
+char* dirpath = NULL;
 
 int get_depth(const char *path, char *deepest_dir) {
     if(flag) printf("path: %s\n", path);
@@ -48,17 +49,24 @@ int get_depth(const char *path, char *deepest_dir) {
 }
 
 int main(int argc, char *argv[]) {
-    flag = (argc > 1 && strcmp(argv[1], "--verbose") == 0) ? 1 : 0;
+    for(int i=1; i<argc;i++){
+        if(strcmp(argv[i], "--verbose") == 0) flag=1;
+        else dirpath = argv[i];
+    }
+
     char cwd[PATH_MAX];
     char deepest_dir[PATH_MAX];
 
-    if (getcwd(cwd, sizeof(cwd)) == NULL) {
-        perror("getcwd() error");
-        return 1;
+    if (dirpath == NULL) {
+        if (getcwd(cwd, sizeof(cwd)) == NULL) {
+            perror("getcwd() error");
+            return 1;
+        }
+        dirpath = cwd;
     }
 
-    int depth = get_depth(cwd, deepest_dir);
-    printf("Depth of the filesystem tree from the current directory: %d\n", depth);
+    int depth = get_depth(dirpath, deepest_dir);
+    printf("Depth of the filesystem tree from the directory '%s': %d\n", dirpath, depth);
     printf("Deepest directory: %s\n", deepest_dir);
 
     return 0;
